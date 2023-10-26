@@ -1,9 +1,1 @@
-﻿  NinjaInjector.cpp
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(49,23): warning C4018: '<': signed/unsigned mismatch
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(86,85): warning C4244: 'argument': conversion from 'SIZE_T' to 'DWORD', possible loss of data
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(132,20): warning C4244: '=': conversion from 'SIZE_T' to 'DWORD', possible loss of data
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(115,12): warning C4101: 'hMap': unreferenced local variable
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(118,12): warning C4101: 'mapViewMemory': unreferenced local variable
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(191,12): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'size_t'
-S:\MalwareDeveloped\NinjaInjector\NinjaInjector\NinjaInjector\NinjaInjector.cpp(191,12): message : consider using '%zd' in the format string
-  NinjaInjector.vcxproj -> S:\MalwareDeveloped\NinjaInjector\NinjaInjector\x64\Debug\NinjaInjector.exe
+﻿  NinjaInjector.vcxproj -> S:\MalwareDeveloped\NinjaInjector\NinjaInjector\x64\Debug\NinjaInjector.exe

