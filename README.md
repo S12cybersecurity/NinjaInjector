@@ -14,18 +14,16 @@ Forcing Page Guard Exceptions:
 
 WriteProcessMemory:
 
-![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/de4b0a62-f5ff-4b98-923c-31817377337c)
+![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/4879c1c4-13e4-4cde-898e-7310b9e7acd2)
 
 CreateRemoteThread:
 
-![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/98decf3f-d644-4f57-b836-1effd8b23112)
-
+![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/288a02e8-21c6-4c38-9b3d-4d14aeea9b5a)
 
 Handling Exceptions:
 
-![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/f67c52dc-130a-4f48-a8da-6c0039315e14)
-
+![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/89f949f0-d168-413e-92c0-2cc768bd8e51)
 
 The flow code is the following:
 
-![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/d6a19688-02ca-46cf-ac6e-dd1c93c58775)
+![image](https://github.com/S12cybersecurity/NinjaInjector/assets/79543461/afa6ec95-bb27-46ad-8c5c-36ace4e98985)
